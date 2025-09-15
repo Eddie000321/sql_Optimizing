@@ -1,5 +1,5 @@
 **Overview**
-- A set of SQLite-based practice snippets for SQL performance tuning and concurrency. Using the `movies.db` sample database, you can experiment with indexes, covering indexes, query plans, partial indexes, transactions, locks, and race conditions.
+- Student-friendly SQLite lab to test core SQL theory with hands-on experiments. Using `movies.db`, verify how indexes affect query plans and latency, and how transactions/locks prevent concurrency anomalies.
 
 **Requirements**
 - `sqlite3` CLI must be installed.
@@ -7,10 +7,12 @@
 **Quick Start**
 - Run `sqlite3 movies.db`, then enable the following helpers:
   - ``.headers on``  ``.mode column``  ``.timer on``
+- Initialize practice tables (optional): ``.read schema.sql``
 - Execute each script from the SQLite prompt with ``.read <filename>``.
   - Example: ``.read queryPlans.sql``
 
 **Files**
+- `schema.sql`: Creates `accounts` table and seeds rows (safe to re-run)
 - `indexes.sql`: Single-column index and basic lookups
   - ``CREATE INDEX "title_index" ON "movies" ("title");``
   - ``SELECT * FROM "movies" WHERE "title" = 'Cars';``
@@ -29,7 +31,7 @@
   - Example table assumption: ``accounts(id, balance)``.
 - `Locks.sql`: Write lock exercise
   - Acquire a write lock with ``BEGIN EXCLUSIVE TRANSACTION;``. In another session, observe concurrent writes waiting/failing.
-- `raceConditions`: Placeholder for race-condition practice (currently empty). Try opening two SQLite sessions to simulate competing updates without transactions, then resolve with transactions/locks.
+- `raceConditions.sql`: Two-session lost update and non-atomic transfer demos with fixes.
 - `movies.db`: SQLite database file for practice.
 
 **Tips**
@@ -41,13 +43,17 @@
 
 **Notes**
 - ``UPDATE`` statements in `transaction.sql` modify data. Wrap practice in a transaction and ``ROLLBACK`` when needed.
-- `PartialIndex.sql` contains a table typo ("moives"). Fix to "movies" to avoid errors.
-- Scripts are minimal, instructional examples. Required schemas (e.g., ``movies``, ``people``, ``stars``, ``accounts``) must exist in the DB.
+- Scripts are minimal, instructional examples. Required schemas (e.g., ``movies``, ``people``, ``stars``) exist in `movies.db`. The lab-specific `accounts` table is created by `schema.sql`.
 
 **Recommended Workflow**
-- 1) Run a baseline query → 2) check ``EXPLAIN QUERY PLAN`` → 3) design/create indexes → 4) check the plan again → 5) compare timings with ``.timer on`` → 6) drop unnecessary indexes with ``DROP INDEX``.
+- 1) Baseline query → 2) ``EXPLAIN QUERY PLAN`` → 3) add/remove indexes (hypothesis) → 4) re-check plan → 5) measure with ``.timer on`` → 6) record in `MEASUREMENTS.md` → 7) clean up with ``DROP INDEX``.
+
+**Learning Goals (Student Level)**
+- Explain full scan vs index scan from a real plan.
+- Show covering index benefit by skipping table lookups.
+- Design partial indexes that match predicates and verify when they’re used.
+- Enforce atomicity/isolation with transactions and observe lock behavior.
 
 **Next Steps (Suggestions)**
-- Fill in the `raceConditions` script (add two-session update/read scenarios).
-- Add ``IF NOT EXISTS`` to index creation statements for idempotent runs.
-- Optionally add schema init scripts (e.g., create test tables like ``accounts``).
+- Extend `raceConditions.sql` with snapshot tests for different isolation modes.
+- Add more composite index order experiments (leading column selectivity).
