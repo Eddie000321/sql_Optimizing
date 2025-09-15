@@ -17,21 +17,21 @@
   - ``CREATE INDEX "title_index" ON "movies" ("title");``
   - ``SELECT * FROM "movies" WHERE "title" = 'Cars';``
 - `coveringIndexes.sql`: Covering index and runtime observation
-  - ``CREATE INDEX "person_index" ON "stars" ("person_id", "movie_id");``
-  - Use ``EXPLAIN QUERY PLAN`` and then run the actual ``SELECT``. Use ``.timer on`` to measure time.
+  - Creates ``person_index(stars.person_id, movie_id)`` and ``name_index(people.name)`` for clearer comparison
+  - Uses ``EXPLAIN QUERY PLAN`` and then runs the actual ``SELECT`` with ``.timer on``
+  - Cleans up created indexes at the end
 - `queryPlans.sql`: Compare query plans and observe index impact
-  - Baseline query → ``EXPLAIN QUERY PLAN`` → create indexes (``stars(person_id)``, ``people(name)``) → run ``EXPLAIN QUERY PLAN`` again → clean up with ``DROP INDEX "person_index";``
+  - Baseline query → ``EXPLAIN QUERY PLAN`` → create indexes (``stars(person_id)``, ``people(name)``) → run ``EXPLAIN QUERY PLAN`` again → clean up with ``DROP INDEX ...``
 - `PartialIndex.sql`: Partial index and predicate matching
-  - ``CREATE INDEX "recents" ON "moives" ("title") WHERE "year" = 2023;``
+  - ``CREATE INDEX "recents" ON "movies" ("title") WHERE "year" = 2023;``
   - Then use ``EXPLAIN QUERY PLAN`` to compare conditions ``year = 2023`` vs ``year = 2022``.
-  - Note: there is a table name typo ("moives" → "movies"). For actual use, fix it as:
-    - ``CREATE INDEX "recents" ON "movies" ("title") WHERE "year" = 2023;``
 - `transaction.sql`: Transactions, atomicity, rollback
   - Issue standalone ``UPDATE`` statements → group them with ``BEGIN TRANSACTION``/``COMMIT`` → simulate errors and use ``ROLLBACK``.
   - Example table assumption: ``accounts(id, balance)``.
 - `Locks.sql`: Write lock exercise
   - Acquire a write lock with ``BEGIN EXCLUSIVE TRANSACTION;``. In another session, observe concurrent writes waiting/failing.
 - `raceConditions.sql`: Two-session lost update and non-atomic transfer demos with fixes.
+- `reset.sql`: Optional helper to restore ``accounts`` demo balances.
 - `movies.db`: SQLite database file for practice.
 
 **Tips**
@@ -47,6 +47,7 @@
 
 **Recommended Workflow**
 - 1) Baseline query → 2) ``EXPLAIN QUERY PLAN`` → 3) add/remove indexes (hypothesis) → 4) re-check plan → 5) measure with ``.timer on`` → 6) record in `MEASUREMENTS.md` → 7) clean up with ``DROP INDEX``.
+- If transaction demos changed balances, run ``.read reset.sql`` to restore.
 
 **Learning Goals (Student Level)**
 - Explain full scan vs index scan from a real plan.
